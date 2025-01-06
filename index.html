@@ -27,12 +27,14 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 600px;
-            margin: 0 auto;
+            margin: 20px auto;
             padding: 20px;
             background: linear-gradient(-45deg, #1a2a3a, #2c3e50, #34495e, #2c3e50);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
-            min-height: 100vh;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
             color: var(--text-color);
             line-height: 1.6;
         }
@@ -45,20 +47,37 @@
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) transparent;
+        }
+
+        #appointmentForm::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #appointmentForm::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #appointmentForm::-webkit-scrollbar-thumb {
+            background-color: var(--accent-color);
+            border-radius: 4px;
         }
 
         h1 {
             text-align: center;
             color: var(--accent-color);
-            margin-bottom: 2rem;
+            margin: 0 0 1rem 0;
             font-size: 2.2rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             background: rgba(44, 62, 80, 0.6);
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
@@ -96,7 +115,8 @@
 
         textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 60px;
+            max-height: 120px;
         }
 
         button {
@@ -113,7 +133,7 @@
             transition: all 1s;
             overflow: hidden;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 12px;
         }
 
         button:hover {
@@ -151,13 +171,20 @@
         }
 
         #message {
-            margin-top: 20px;
+            margin-top: 10px;
             padding: 10px;
             border-radius: 4px;
             display: none;
             text-align: center;
             font-weight: 500;
             animation: slideIn 0.3s ease;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 580px;
+            z-index: 1000;
         }
 
         .success {
@@ -259,7 +286,7 @@
             emailjs.init("Clyvjj8mdxGrnupPq");
         })();
     </script>
-    <h1>Schedule an Appointment with Wael</h1>
+    <h1>Schedule an Appointment with <span style="white-space: nowrap;">Wael</span></h1>
     <form id="appointmentForm">
         <div class="form-group">
             <label for="name">Name:</label>
