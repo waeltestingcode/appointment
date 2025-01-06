@@ -81,7 +81,15 @@
         </div>
         <div class="form-group">
             <label for="phone">Phone Number:</label>
-            <input type="tel" id="phone" required>
+            <input 
+                type="tel" 
+                id="phone" 
+                required 
+                pattern="[0-9]*" 
+                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                maxlength="15"
+                placeholder="Enter numbers only"
+            >
         </div>
         <div class="form-group">
             <label for="email">Email:</label>
