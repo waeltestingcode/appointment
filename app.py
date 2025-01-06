@@ -1,14 +1,9 @@
 from flask import Flask, request, jsonify, send_file
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
-import pickle
 import os
 from datetime import datetime, timedelta
 from flask_cors import CORS
-
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Enable OAuth for development
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": ["https://appointment-0lgh.onrender.com", "http://localhost:5000"]}})
@@ -25,21 +20,11 @@ def serve_script():
     return send_file('script.js')
 
 def get_calendar_service():
-    creds = None
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
+    creds = service_account.Credentials.from_service_account_file(
+        'service-account.json', scopes=SCOPES)
     
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=8080)
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
-
+    # Use the calendar ID of your calendar
+    delegated_creds = creds.with_subject('fortnitemobilegamerx@gmail.com')  # Replace with your email
     return build('calendar', 'v3', credentials=creds)
 
 @app.route('/schedule-appointment', methods=['POST'])
