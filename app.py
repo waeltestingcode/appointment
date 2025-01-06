@@ -11,7 +11,7 @@ from flask_cors import CORS
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Enable OAuth for development
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["https://your-render-url.onrender.com", "http://localhost:5000"]}})
+CORS(app, resources={r"/*": {"origins": ["https://appointment-0lgh.onrender.com", "http://localhost:5000"]}})
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
