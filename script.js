@@ -1,5 +1,12 @@
 const API_URL = 'https://appointment-0lgh.onrender.com';
 
+// Set minimum date to today when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+});
+
 function showMessage(text, isError = false) {
     const messageDiv = document.getElementById('message');
     messageDiv.textContent = text;
