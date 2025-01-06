@@ -25,7 +25,7 @@ def get_calendar_service():
     
     # Use the calendar ID of your calendar
     delegated_creds = creds.with_subject('fortnitemobilegamerx@gmail.com')  # Replace with your email
-    return build('calendar', 'v3', credentials=creds)
+    return build('calendar', 'v3', credentials=delegated_creds)
 
 @app.route('/schedule-appointment', methods=['POST'])
 def schedule_appointment():
@@ -57,7 +57,10 @@ def schedule_appointment():
         if events:
             return jsonify({'error': 'Time slot already booked'}), 409
 
-        event = service.events().insert(calendarId='primary', body=event).execute()
+        event = service.events().insert(
+            calendarId='fortnitemobilegamerx@gmail.com',  # Your actual calendar ID
+            body=event
+        ).execute()
         return jsonify({'success': True, 'eventId': event['id']})
 
     except Exception as e:
@@ -76,7 +79,7 @@ def check_appointments():
 
         service = get_calendar_service()
         events_result = service.events().list(
-            calendarId='primary',
+            calendarId='fortnitemobilegamerx@gmail.com',  # Your actual calendar ID
             timeMin=start_time,
             timeMax=end_time,
             singleEvents=True,
