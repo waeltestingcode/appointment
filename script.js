@@ -1,4 +1,4 @@
-const API_URL = 'https://your-render-url.onrender.com';
+const API_URL = 'https://appointment-0lgh.onrender.com';
 
 async function scheduleAppointment() {
     // Prevent form submission
