@@ -59,6 +59,23 @@ async function scheduleAppointment() {
             throw new Error(data.error || 'Failed to schedule appointment');
         }
 
+        // Send confirmation email
+        try {
+            await emailjs.send(
+                "service_kobz9f7",
+                "template_05b1tgq",
+                {
+                    to_email: email,
+                    to_name: name,
+                    appointment_date: new Date(startDateTime).toLocaleDateString(),
+                    appointment_time: time,
+                    appointment_reason: reason
+                }
+            );
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError);
+        }
+
         showMessage('Appointment scheduled successfully!');
         document.forms['appointmentForm'].reset();
 
