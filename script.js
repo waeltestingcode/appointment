@@ -66,7 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function showMessage(text, isError = false) {
     const messageDiv = document.getElementById('message');
     messageDiv.textContent = text;
-    messageDiv.className = isError ? 'error' : 'success';
     messageDiv.style.display = 'block';
     
     // Optionally hide the message after 5 seconds
