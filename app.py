@@ -1,77 +1,348 @@
-from flask import Flask, request, jsonify, send_file
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-import os
-from datetime import datetime
-from flask_cors import CORS
-import json
-
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["https://appointment-0lgh.onrender.com", "http://localhost:5000"]}})
-
-SCOPES = ['https://www.googleapis.com/auth/calendar']
-
-@app.route('/')
-def serve_app():
-    return send_file('index.html')
-
-@app.route('/script.js')
-def serve_script():
-    return send_file('script.js')
-
-def get_calendar_service():
-    try:
-        service_account_info = json.loads(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '{}'))
-        if not service_account_info:
-            raise Exception("No credentials found in environment variables")
-        
-        creds = service_account.Credentials.from_service_account_info(
-            service_account_info,
-            scopes=SCOPES)
-        
-        return build('calendar', 'v3', credentials=creds)
-    except Exception as e:
-        print(f"Error in get_calendar_service: {str(e)}")
-        raise
-
-@app.route('/schedule-appointment', methods=['POST'])
-def schedule_appointment():
-    try:
-        data = request.json
-        service = get_calendar_service()
-        
-        event = {
-            'summary': f"Appointment with {data['name']}",
-            'description': f"Reason: {data['reason']}\nPhone: {data['phone']}\nEmail: {data['email']}",
-            'start': {
-                'dateTime': data['startTime'],
-                'timeZone': 'Asia/Dubai',
-            },
-            'end': {
-                'dateTime': data['endTime'],
-                'timeZone': 'Asia/Dubai',
-            },
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Scheduler</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --text-color: #ecf0f1;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
         }
 
-        # Check if timeslot is available
-        events_result = service.events().list(
-            calendarId='fortnitemobilegamerx@gmail.com',
-            timeMin=data['startTime'],
-            timeMax=data['endTime'],
-            singleEvents=True
-        ).execute()
-        
-        if events_result.get('items', []):
-            return jsonify({'error': 'Time slot already booked'}), 409
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
 
-        event = service.events().insert(
-            calendarId='fortnitemobilegamerx@gmail.com',
-            body=event
-        ).execute()
-        return jsonify({'success': True, 'eventId': event['id']})
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: linear-gradient(-45deg, #1a2a3a, #2c3e50, #34495e, #2c3e50);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
 
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        /* Add a container for the form with glassmorphism effect */
+        #appointmentForm {
+            background: rgba(52, 73, 94, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) transparent;
+        }
 
-if __name__ == '__main__':
-    app.run(port=5000) 
+        #appointmentForm::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #appointmentForm::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #appointmentForm::-webkit-scrollbar-thumb {
+            background-color: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin: 0 0 1rem 0;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+            background: rgba(44, 62, 80, 0.6);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .form-group:hover {
+            transform: translateY(-2px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 0;
+            background: var(--primary-color);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+            border-color: var(--accent-color);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+            max-height: 120px;
+        }
+
+        button {
+            color: var(--accent-color);
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid var(--accent-color);
+            padding: 10px 20px;
+            font-size: 17px;
+            cursor: pointer;
+            font-weight: bold;
+            background: transparent;
+            position: relative;
+            transition: all 1s;
+            overflow: hidden;
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        button:hover {
+            color: white;
+        }
+
+        button::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 0%;
+            top: 0;
+            left: -40px;
+            transform: skewX(45deg);
+            background-color: var(--accent-color);
+            z-index: -1;
+            transition: all 1s;
+        }
+
+        button:hover::before {
+            width: 160%;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
+        .loading-text {
+            display: none;
+            color: var(--accent-color);
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        #message {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 4px;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+            background: rgba(44, 62, 80, 0.8);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--accent-color);
+        }
+
+        #message.processing {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        #message.success {
+            color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        #message.error {
+            color: var(--error-color);
+            border-color: var(--error-color);
+        }
+
+        .date-wrapper {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .date-wrapper input[type="date"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--primary-color);
+            padding: 8px;
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            color: var(--text-color);
+        }
+
+        .date-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Style the select dropdown */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%233498db' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 32px;
+        }
+
+        /* Add floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(52, 152, 219, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init("Clyvjj8mdxGrnupPq");
+        })();
+    </script>
+    <h1>Schedule an Appointment with <span style="white-space: nowrap;">Wael</span></h1>
+    <form id="appointmentForm">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone Number:</label>
+            <input 
+                type="tel" 
+                id="phone" 
+                required 
+                pattern="[0-9]*" 
+                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                maxlength="15"
+                placeholder="Enter numbers only"
+            >
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+            <label for="date">Date:</label>
+            <div class="date-wrapper" onclick="document.getElementById('date').showPicker()">
+                <input 
+                    type="date" 
+                    id="date" 
+                    required 
+                    min="" 
+                    style="cursor: pointer; width: 100%;"
+                >
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="time">Time:</label>
+            <select id="time" required>
+                <option value="">Select time</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="13:00">1:00 PM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="15:00">3:00 PM</option>
+                <option value="16:00">4:00 PM</option>
+                <option value="17:00">5:00 PM</option>
+                <option value="18:00">6:00 PM</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="reason">Appointment Reason:</label>
+            <textarea id="reason" required></textarea>
+        </div>
+        <button onclick="scheduleAppointment()">Schedule Appointment</button>
+    </form>
+    <div id="message"></div>
+    <script src="script.js"></script>
+</body>
+</html> 
