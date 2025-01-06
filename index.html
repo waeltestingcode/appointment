@@ -12,14 +12,39 @@
             --success-color: #2ecc71;
         }
 
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            background-color: var(--primary-color);
+            background: linear-gradient(-45deg, #1a2a3a, #2c3e50, #34495e, #2c3e50);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
             color: var(--text-color);
             line-height: 1.6;
+        }
+
+        /* Add a container for the form with glassmorphism effect */
+        #appointmentForm {
+            background: rgba(52, 73, 94, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
         h1 {
@@ -32,11 +57,13 @@
 
         .form-group {
             margin-bottom: 15px;
-            background: var(--secondary-color);
+            background: rgba(44, 62, 80, 0.6);
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
 
         .form-group:hover {
@@ -73,24 +100,41 @@
         }
 
         button {
-            background-color: var(--accent-color);
-            color: white;
-            padding: 12px 24px;
-            border: none;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid var(--accent-color);
+            padding: 10px 20px;
+            font-size: 17px;
             cursor: pointer;
-            border-radius: 4px;
+            font-weight: bold;
+            background: transparent;
+            position: relative;
+            transition: all 1s;
+            overflow: hidden;
             width: 100%;
-            font-size: 1.1rem;
-            font-weight: 500;
             margin-top: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         button:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            color: white;
+        }
+
+        button::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 0%;
+            top: 0;
+            left: -40px;
+            transform: skewX(45deg);
+            background-color: var(--accent-color);
+            z-index: -1;
+            transition: all 1s;
+        }
+
+        button:hover::before {
+            width: 160%;
         }
 
         #message {
@@ -159,9 +203,43 @@
             background-position: right 8px center;
             padding-right: 32px;
         }
+
+        /* Add floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(52, 152, 219, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="particles" id="particles"></div>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
