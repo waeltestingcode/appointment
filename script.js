@@ -1,10 +1,8 @@
 const API_URL = 'https://appointment-0lgh.onrender.com';
 
 async function scheduleAppointment() {
-    // Prevent form submission
     event.preventDefault();
 
-    // Get form values
     const name = document.getElementById('name').value;
     const phone = document.getElementById('phone').value;
     const email = document.getElementById('email').value;
