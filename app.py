@@ -73,39 +73,5 @@ def schedule_appointment():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/check-appointments')
-def check_appointments():
-    try:
-        date = request.args.get('date')
-        if not date:
-            return jsonify({'error': 'Date is required'}), 400
-
-        service = get_calendar_service()
-        events_result = service.events().list(
-            calendarId='fortnitemobilegamerx@gmail.com',
-            timeMin=f"{date}T00:00:00Z",
-            timeMax=f"{date}T23:59:59Z",
-            singleEvents=True,
-            orderBy='startTime'
-        ).execute()
-        
-        appointments = []
-        for event in events_result.get('items', []):
-            start = event['start'].get('dateTime')
-            if start:
-                time = datetime.fromisoformat(start.replace('Z', '+00:00')).strftime('%I:%M %p')
-                appointments.append({
-                    'time': time,
-                    'summary': event['summary']
-                })
-
-        return jsonify({
-            'success': True,
-            'appointments': appointments
-        })
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 if __name__ == '__main__':
     app.run(port=5000) 
