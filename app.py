@@ -21,11 +21,11 @@ def serve_script():
 
 def get_calendar_service():
     creds = service_account.Credentials.from_service_account_file(
-        'service-account.json', scopes=SCOPES)
+        'service-account.json',
+        scopes=SCOPES,
+        subject='fortnitemobilegamerx@gmail.com')  # Your email
     
-    # Use the calendar ID of your calendar
-    delegated_creds = creds.with_subject('fortnitemobilegamerx@gmail.com')  # Replace with your email
-    return build('calendar', 'v3', credentials=delegated_creds)
+    return build('calendar', 'v3', credentials=creds)
 
 @app.route('/schedule-appointment', methods=['POST'])
 def schedule_appointment():
