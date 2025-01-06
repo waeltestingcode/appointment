@@ -1,62 +1,77 @@
-const API_URL = 'https://appointment-0lgh.onrender.com';
+from flask import Flask, request, jsonify, send_file
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+import os
+from datetime import datetime
+from flask_cors import CORS
+import json
 
-function showMessage(text, isError = false) {
-    const messageDiv = document.getElementById('message');
-    messageDiv.textContent = text;
-    messageDiv.className = isError ? 'error' : 'success';
-    messageDiv.style.display = 'block';
-    
-    // Optionally hide the message after 5 seconds
-    setTimeout(() => {
-        messageDiv.style.display = 'none';
-    }, 5000);
-}
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": ["https://appointment-0lgh.onrender.com", "http://localhost:5000"]}})
 
-async function scheduleAppointment() {
-    event.preventDefault();
+SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-    const name = document.getElementById('name').value;
-    const phone = document.getElementById('phone').value;
-    const email = document.getElementById('email').value;
-    const date = document.getElementById('date').value;
-    const time = document.getElementById('time').value;
-    const reason = document.getElementById('reason').value;
+@app.route('/')
+def serve_app():
+    return send_file('index.html')
 
-    if (!name || !phone || !email || !date || !time || !reason) {
-        showMessage('Please fill in all fields', true);
-        return;
-    }
+@app.route('/script.js')
+def serve_script():
+    return send_file('script.js')
 
-    const startDateTime = new Date(`${date}T${time}`);
-    const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
-
-    try {
-        const response = await fetch(`${API_URL}/schedule-appointment`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name,
-                phone,
-                email,
-                reason,
-                startTime: startDateTime.toISOString(),
-                endTime: endDateTime.toISOString()
-            })
-        });
-
-        const data = await response.json();
+def get_calendar_service():
+    try:
+        service_account_info = json.loads(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '{}'))
+        if not service_account_info:
+            raise Exception("No credentials found in environment variables")
         
-        if (!response.ok) {
-            throw new Error(data.error || 'Failed to schedule appointment');
+        creds = service_account.Credentials.from_service_account_info(
+            service_account_info,
+            scopes=SCOPES)
+        
+        return build('calendar', 'v3', credentials=creds)
+    except Exception as e:
+        print(f"Error in get_calendar_service: {str(e)}")
+        raise
+
+@app.route('/schedule-appointment', methods=['POST'])
+def schedule_appointment():
+    try:
+        data = request.json
+        service = get_calendar_service()
+        
+        event = {
+            'summary': f"Appointment with {data['name']}",
+            'description': f"Reason: {data['reason']}\nPhone: {data['phone']}\nEmail: {data['email']}",
+            'start': {
+                'dateTime': data['startTime'],
+                'timeZone': 'Asia/Dubai',
+            },
+            'end': {
+                'dateTime': data['endTime'],
+                'timeZone': 'Asia/Dubai',
+            },
         }
 
-        showMessage('Appointment scheduled successfully!');
-        document.forms['appointmentForm'].reset();
+        # Check if timeslot is available
+        events_result = service.events().list(
+            calendarId='fortnitemobilegamerx@gmail.com',
+            timeMin=data['startTime'],
+            timeMax=data['endTime'],
+            singleEvents=True
+        ).execute()
+        
+        if events_result.get('items', []):
+            return jsonify({'error': 'Time slot already booked'}), 409
 
-    } catch (err) {
-        console.error('Error:', err);
-        showMessage(err.message || 'Error scheduling appointment. Please try again.', true);
-    }
-} 
+        event = service.events().insert(
+            calendarId='fortnitemobilegamerx@gmail.com',
+            body=event
+        ).execute()
+        return jsonify({'success': True, 'eventId': event['id']})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(port=5000) 
