@@ -78,6 +78,17 @@ function showMessage(text, isError = false) {
 async function scheduleAppointment() {
     event.preventDefault();
 
+    const submitButton = event.target;
+    const loadingText = document.createElement('div');
+    loadingText.className = 'loading-text';
+    loadingText.textContent = 'Scheduling your appointment...';
+    
+    // Disable button and show loading
+    submitButton.disabled = true;
+    submitButton.textContent = 'Processing...';
+    submitButton.parentNode.insertBefore(loadingText, submitButton.nextSibling);
+    loadingText.style.display = 'block';
+
     const name = document.getElementById('name').value;
     const phone = document.getElementById('phone').value;
     const email = document.getElementById('email').value;
@@ -94,6 +105,8 @@ async function scheduleAppointment() {
     const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
 
     try {
+        // Schedule appointment
+        showMessage('Scheduling appointment...');
         const response = await fetch(`${API_URL}/schedule-appointment`, {
             method: 'POST',
             headers: {
@@ -116,6 +129,7 @@ async function scheduleAppointment() {
         }
 
         // Send confirmation email
+        showMessage('Sending confirmation email...');
         try {
             await emailjs.send(
                 "service_kobz9f7",
@@ -139,5 +153,10 @@ async function scheduleAppointment() {
     } catch (err) {
         console.error('Error:', err);
         showMessage(err.message || 'Error scheduling appointment. Please try again.', true);
+    } finally {
+        // Re-enable button and remove loading state
+        submitButton.disabled = false;
+        submitButton.textContent = 'Schedule Appointment';
+        loadingText.style.display = 'none';
     }
 } 
