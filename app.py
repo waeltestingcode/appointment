@@ -21,13 +21,20 @@ def serve_script():
     return send_file('script.js')
 
 def get_calendar_service():
-    import json
-    service_account_info = json.loads(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '{}'))
-    creds = service_account.Credentials.from_service_account_info(
-        service_account_info,
-        scopes=SCOPES)
-    
-    return build('calendar', 'v3', credentials=creds)
+    try:
+        import json
+        service_account_info = json.loads(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '{}'))
+        if not service_account_info:
+            raise Exception("No credentials found in environment variables")
+        
+        creds = service_account.Credentials.from_service_account_info(
+            service_account_info,
+            scopes=SCOPES)
+        
+        return build('calendar', 'v3', credentials=creds)
+    except Exception as e:
+        print(f"Error in get_calendar_service: {str(e)}")
+        raise
 
 @app.route('/schedule-appointment', methods=['POST'])
 def schedule_appointment():
