@@ -4,6 +4,7 @@ from googleapiclient.discovery import build
 import os
 from datetime import datetime, timedelta
 from flask_cors import CORS
+import json
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": ["https://appointment-0lgh.onrender.com", "http://localhost:5000"]}})
@@ -20,10 +21,11 @@ def serve_script():
     return send_file('script.js')
 
 def get_calendar_service():
-    creds = service_account.Credentials.from_service_account_file(
-        'service-account.json',
-        scopes=SCOPES,
-        subject='fortnitemobilegamerx@gmail.com')  # Your email
+    import json
+    service_account_info = json.loads(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '{}'))
+    creds = service_account.Credentials.from_service_account_info(
+        service_account_info,
+        scopes=SCOPES)
     
     return build('calendar', 'v3', credentials=creds)
 
@@ -47,7 +49,7 @@ def schedule_appointment():
         }
 
         events_result = service.events().list(
-            calendarId='primary',
+            calendarId='fortnitemobilegamerx@gmail.com',
             timeMin=data['startTime'],
             timeMax=data['endTime'],
             singleEvents=True
