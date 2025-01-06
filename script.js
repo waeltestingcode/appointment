@@ -125,7 +125,8 @@ async function scheduleAppointment() {
                     to_name: name,
                     appointment_date: new Date(startDateTime).toLocaleDateString(),
                     appointment_time: time,
-                    appointment_reason: reason
+                    appointment_reason: reason,
+                    reply_to: "fortnitemobilegamerx@gmail.com"
                 }
             );
         } catch (emailError) {
