@@ -3,62 +3,131 @@
 <head>
     <title>Appointment Scheduler</title>
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --text-color: #ecf0f1;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            line-height: 1.6;
         }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 2rem;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
         .form-group {
             margin-bottom: 15px;
+            background: var(--secondary-color);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
         }
+
+        .form-group:hover {
+            transform: translateY(-2px);
+        }
+
         label {
             display: block;
             margin-bottom: 5px;
+            color: var(--accent-color);
+            font-weight: 500;
         }
+
         input, select, textarea {
             width: 100%;
             padding: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 0;
+            background: var(--primary-color);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            transition: all 0.3s ease;
         }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+            border-color: var(--accent-color);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
         button {
-            background-color: #4CAF50;
+            background-color: var(--accent-color);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
             cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+
         button:hover {
-            background-color: #45a049;
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
+
         #message {
             margin-top: 20px;
             padding: 10px;
             border-radius: 4px;
             display: none;
+            text-align: center;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
         }
+
         .success {
-            background-color: #dff0d8;
-            color: #3c763d;
-            border: 1px solid #d6e9c6;
+            background-color: var(--success-color);
+            color: white;
         }
+
         .error {
-            background-color: #f2dede;
-            color: #a94442;
-            border: 1px solid #ebccd1;
+            background-color: var(--error-color);
+            color: white;
         }
+
         .date-wrapper {
             position: relative;
             cursor: pointer;
         }
+
         .date-wrapper input[type="date"] {
             -webkit-appearance: none;
             appearance: none;
-            background: white;
+            background: var(--primary-color);
             padding: 8px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--accent-color);
             border-radius: 4px;
+            color: var(--text-color);
         }
+
         .date-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
             position: absolute;
             top: 0;
@@ -69,6 +138,26 @@
             height: 100%;
             opacity: 0;
             cursor: pointer;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Style the select dropdown */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%233498db' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 32px;
         }
     </style>
 </head>
