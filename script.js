@@ -61,6 +61,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const dateInput = document.getElementById('date');
     const today = new Date().toISOString().split('T')[0];
     dateInput.min = today;
+
+    // Add validation check on input changes
+    const form = document.getElementById('appointmentForm');
+    const submitButton = form.querySelector('button');
+    const inputs = form.querySelectorAll('input, select, textarea');
+
+    function checkFormValidity() {
+        let isValid = true;
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                isValid = false;
+            }
+        });
+        
+        submitButton.disabled = !isValid;
+        submitButton.style.opacity = isValid ? '1' : '0.5';
+        submitButton.style.cursor = isValid ? 'pointer' : 'not-allowed';
+    }
+
+    inputs.forEach(input => {
+        input.addEventListener('input', checkFormValidity);
+        input.addEventListener('change', checkFormValidity);
+    });
+
+    // Initial check
+    checkFormValidity();
 });
 
 function showMessage(text, type = 'processing') {
@@ -79,6 +105,12 @@ function showMessage(text, type = 'processing') {
 
 async function scheduleAppointment() {
     event.preventDefault();
+
+    const form = document.getElementById('appointmentForm');
+    if (!form.checkValidity()) {
+        showMessage('Please fill in all required fields', 'error');
+        return;
+    }
 
     const submitButton = event.target;
     // Disable button and show loading
