@@ -1,5 +1,61 @@
 const API_URL = 'https://appointment-0lgh.onrender.com';
 
+// Create floating particles
+function createParticles() {
+    const container = document.getElementById('particles');
+    const particleCount = 20;
+    
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Random size between 5 and 15 pixels
+        const size = Math.random() * 10 + 5;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random starting position
+        particle.style.left = `${Math.random() * 100}vw`;
+        particle.style.top = `${Math.random() * 100}vh`;
+        
+        // Random animation duration between 10 and 20 seconds
+        particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+        
+        container.appendChild(particle);
+        
+        // Remove and recreate particle when animation ends
+        particle.addEventListener('animationend', () => {
+            particle.remove();
+            createParticle();
+        });
+    }
+}
+
+function createParticle() {
+    const container = document.getElementById('particles');
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    
+    const size = Math.random() * 10 + 5;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    
+    particle.style.left = `${Math.random() * 100}vw`;
+    particle.style.top = '100vh';
+    
+    particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+    
+    container.appendChild(particle);
+    
+    particle.addEventListener('animationend', () => {
+        particle.remove();
+        createParticle();
+    });
+}
+
+// Initialize particles when page loads
+document.addEventListener('DOMContentLoaded', createParticles);
+
 // Set minimum date to today when page loads
 document.addEventListener('DOMContentLoaded', function() {
     const dateInput = document.getElementById('date');
