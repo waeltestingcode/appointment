@@ -164,6 +164,16 @@
             cursor: wait;
         }
 
+        /* Add styles for disabled state */
+        button[disabled]::before {
+            display: none;
+        }
+
+        button[disabled]:hover {
+            color: var(--accent-color);
+            cursor: not-allowed;
+        }
+
         .loading-text {
             display: none;
             color: var(--accent-color);
