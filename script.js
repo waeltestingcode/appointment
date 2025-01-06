@@ -1,5 +1,17 @@
 const API_URL = 'https://appointment-0lgh.onrender.com';
 
+function showMessage(text, isError = false) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = text;
+    messageDiv.className = isError ? 'error' : 'success';
+    messageDiv.style.display = 'block';
+    
+    // Optionally hide the message after 5 seconds
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 5000);
+}
+
 async function scheduleAppointment() {
     event.preventDefault();
 
@@ -11,7 +23,7 @@ async function scheduleAppointment() {
     const reason = document.getElementById('reason').value;
 
     if (!name || !phone || !email || !date || !time || !reason) {
-        alert('Please fill in all fields');
+        showMessage('Please fill in all fields', true);
         return;
     }
 
@@ -40,41 +52,11 @@ async function scheduleAppointment() {
             throw new Error(data.error || 'Failed to schedule appointment');
         }
 
-        alert('Appointment scheduled successfully!');
+        showMessage('Appointment scheduled successfully!');
         document.forms['appointmentForm'].reset();
 
     } catch (err) {
         console.error('Error:', err);
-        alert(err.message || 'Error scheduling appointment. Please try again.');
-    }
-}
-
-async function checkAppointments() {
-    const date = document.getElementById('date').value;
-    if (!date) {
-        alert('Please select a date to check appointments');
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_URL}/check-appointments?date=${date}`);
-        const data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.error || 'Failed to fetch appointments');
-        }
-
-        if (data.appointments.length === 0) {
-            alert('No appointments scheduled for this date');
-        } else {
-            const appointmentsList = data.appointments
-                .map(apt => `${apt.time}: ${apt.summary}`)
-                .join('\n');
-            alert(`Appointments for ${date}:\n${appointmentsList}`);
-        }
-
-    } catch (err) {
-        console.error('Error:', err);
-        alert('Error checking appointments. Please try again.');
+        showMessage(err.message || 'Error scheduling appointment. Please try again.', true);
     }
 } 
