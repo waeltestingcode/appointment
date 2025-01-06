@@ -63,30 +63,28 @@ document.addEventListener('DOMContentLoaded', function() {
     dateInput.min = today;
 });
 
-function showMessage(text, isError = false) {
+function showMessage(text, type = 'processing') {
     const messageDiv = document.getElementById('message');
     messageDiv.textContent = text;
+    messageDiv.className = type;  // 'processing', 'success', or 'error'
     messageDiv.style.display = 'block';
     
-    // Optionally hide the message after 5 seconds
-    setTimeout(() => {
-        messageDiv.style.display = 'none';
-    }, 5000);
+    // Only auto-hide success and error messages
+    if (type !== 'processing') {
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
 }
 
 async function scheduleAppointment() {
     event.preventDefault();
 
     const submitButton = event.target;
-    const loadingText = document.createElement('div');
-    loadingText.className = 'loading-text';
-    loadingText.textContent = 'Scheduling your appointment...';
-    
     // Disable button and show loading
     submitButton.disabled = true;
     submitButton.textContent = 'Processing...';
-    submitButton.parentNode.insertBefore(loadingText, submitButton.nextSibling);
-    loadingText.style.display = 'block';
+    showMessage('Scheduling your appointment...', 'processing');
 
     const name = document.getElementById('name').value;
     const phone = document.getElementById('phone').value;
@@ -105,7 +103,6 @@ async function scheduleAppointment() {
 
     try {
         // Schedule appointment
-        showMessage('Scheduling appointment...');
         const response = await fetch(`${API_URL}/schedule-appointment`, {
             method: 'POST',
             headers: {
@@ -128,7 +125,6 @@ async function scheduleAppointment() {
         }
 
         // Send confirmation email
-        showMessage('Sending confirmation email...');
         try {
             await emailjs.send(
                 "service_kobz9f7",
@@ -146,16 +142,15 @@ async function scheduleAppointment() {
             console.error('Email sending failed:', emailError);
         }
 
-        showMessage('Appointment scheduled successfully!');
+        showMessage('Appointment scheduled successfully!', 'success');
         document.forms['appointmentForm'].reset();
 
     } catch (err) {
         console.error('Error:', err);
-        showMessage(err.message || 'Error scheduling appointment. Please try again.', true);
+        showMessage(err.message || 'Error scheduling appointment. Please try again.', 'error');
     } finally {
-        // Re-enable button and remove loading state
+        // Re-enable button
         submitButton.disabled = false;
         submitButton.textContent = 'Schedule Appointment';
-        loadingText.style.display = 'none';
     }
 } 
