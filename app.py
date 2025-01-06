@@ -2,14 +2,13 @@ from flask import Flask, request, jsonify, send_file
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from flask_cors import CORS
 import json
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": ["https://appointment-0lgh.onrender.com", "http://localhost:5000"]}})
 
-# If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 @app.route('/')
@@ -22,7 +21,6 @@ def serve_script():
 
 def get_calendar_service():
     try:
-        import json
         service_account_info = json.loads(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '{}'))
         if not service_account_info:
             raise Exception("No credentials found in environment variables")
@@ -55,19 +53,19 @@ def schedule_appointment():
             },
         }
 
+        # Check if timeslot is available
         events_result = service.events().list(
             calendarId='fortnitemobilegamerx@gmail.com',
             timeMin=data['startTime'],
             timeMax=data['endTime'],
             singleEvents=True
         ).execute()
-        events = events_result.get('items', [])
-
-        if events:
+        
+        if events_result.get('items', []):
             return jsonify({'error': 'Time slot already booked'}), 409
 
         event = service.events().insert(
-            calendarId='fortnitemobilegamerx@gmail.com',  # Your actual calendar ID
+            calendarId='fortnitemobilegamerx@gmail.com',
             body=event
         ).execute()
         return jsonify({'success': True, 'eventId': event['id']})
@@ -82,23 +80,17 @@ def check_appointments():
         if not date:
             return jsonify({'error': 'Date is required'}), 400
 
-        # Create time bounds for the day
-        start_time = f"{date}T00:00:00Z"
-        end_time = f"{date}T23:59:59Z"
-
         service = get_calendar_service()
         events_result = service.events().list(
-            calendarId='fortnitemobilegamerx@gmail.com',  # Your actual calendar ID
-            timeMin=start_time,
-            timeMax=end_time,
+            calendarId='fortnitemobilegamerx@gmail.com',
+            timeMin=f"{date}T00:00:00Z",
+            timeMax=f"{date}T23:59:59Z",
             singleEvents=True,
             orderBy='startTime'
         ).execute()
         
-        events = events_result.get('items', [])
         appointments = []
-        
-        for event in events:
+        for event in events_result.get('items', []):
             start = event['start'].get('dateTime')
             if start:
                 time = datetime.fromisoformat(start.replace('Z', '+00:00')).strftime('%I:%M %p')
@@ -116,4 +108,4 @@ def check_appointments():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True) 
+    app.run(port=5000) 
