@@ -47,6 +47,29 @@
             color: #a94442;
             border: 1px solid #ebccd1;
         }
+        .date-wrapper {
+            position: relative;
+            cursor: pointer;
+        }
+        .date-wrapper input[type="date"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: white;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .date-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -66,13 +89,15 @@
         </div>
         <div class="form-group">
             <label for="date">Date:</label>
-            <input 
-                type="date" 
-                id="date" 
-                required 
-                min="" 
-                style="cursor: pointer;"
-            >
+            <div class="date-wrapper" onclick="document.getElementById('date').showPicker()">
+                <input 
+                    type="date" 
+                    id="date" 
+                    required 
+                    min="" 
+                    style="cursor: pointer; width: 100%;"
+                >
+            </div>
         </div>
         <div class="form-group">
             <label for="time">Time:</label>
